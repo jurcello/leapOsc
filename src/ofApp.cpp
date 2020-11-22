@@ -17,6 +17,7 @@ void ofApp::setup(){
     glEnable(GL_NORMALIZE);
 
     gui.setup();
+    sender.setup(OSC_SEND_HOST, OSC_SEND_PORT);
 }
 
 //--------------------------------------------------------------
@@ -52,7 +53,7 @@ void ofApp::draw(){
     ofBackgroundGradient(ofColor(90, 90, 90), ofColor(30, 30, 30),  OF_GRADIENT_BAR);
 
     ofSetColor(200);
-    ofDrawBitmapString("ofxLeapMotion - Example App\nLeap Connected? " + ofToString(leap.isConnected()), 20, 20);
+    ofDrawBitmapString("ofxLeapMotion - Osc sender\nLeap Connected? " + ofToString(leap.isConnected()), 20, 20);
 
     cam.begin();
 
@@ -101,16 +102,23 @@ void ofApp::draw(){
 
     {
         ImGui::Begin("Values");
+        ImGui::Text("Sending on port %d", OSC_SEND_PORT);
         for (auto hand: simpleHands) {
             if (hand.isLeft) {
                 ImGui::Value("Left x", hand.handPos.x);
+                this->sendOscMessage("/leap/hand/left/x", hand.handPos.x);
                 ImGui::Value("Left y", hand.handPos.y);
+                this->sendOscMessage("/leap/hand/left/y", hand.handPos.y);
                 ImGui::Value("Left z", hand.handPos.z);
+                this->sendOscMessage("/leap/hand/left/z", hand.handPos.z);
             }
             else {
                 ImGui::Value("Right x", hand.handPos.x);
+                this->sendOscMessage("/leap/hand/right/x", hand.handPos.x);
                 ImGui::Value("Right y", hand.handPos.y);
+                this->sendOscMessage("/leap/hand/right/y", hand.handPos.y);
                 ImGui::Value("Right z", hand.handPos.z);
+                this->sendOscMessage("/leap/hand/right/z", hand.handPos.z);
             }
         }
         ImGui::End();
@@ -178,3 +186,11 @@ void ofApp::exit(){
     // let's close down Leap and kill the controller
     leap.close();
 }
+
+void ofApp::sendOscMessage(std::string address, float value) {
+    ofxOscMessage m;
+    m.setAddress(address);
+    m.addFloatArg(value);
+    sender.sendMessage(m, false);
+}
+

@@ -2,7 +2,11 @@
 
 #include "ofMain.h"
 #include "ofxImGui.h"
+#include "ofxOsc.h"
 #include "ofxLeapMotion2.h"
+
+#define OSC_SEND_PORT 20568
+#define OSC_SEND_HOST "localhost"
 
 class ofApp : public ofBaseApp {
 
@@ -42,5 +46,10 @@ public:
 
 	vector <int> fingersFound;
 	ofEasyCam cam;
+
+	ofxOscSender sender;
+
+private:
+	void sendOscMessage(std::string address, float value);
 
 };
