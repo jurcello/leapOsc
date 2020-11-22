@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxImGui.h"
 #include "ofxLeapMotion2.h"
 
 class ofApp : public ofBaseApp {
@@ -35,6 +36,7 @@ public:
     void gotMessage(ofMessage msg);
 	void exit();
 
+	ofxImGui::Gui gui;
 	ofxLeapMotion leap;
 	vector <ofxLeapMotionSimpleHand> simpleHands;
 

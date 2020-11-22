@@ -15,6 +15,8 @@ void ofApp::setup(){
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
+
+    gui.setup();
 }
 
 //--------------------------------------------------------------
@@ -93,6 +95,28 @@ void ofApp::draw(){
         }
     }
     cam.end();
+
+    ////////////////
+    gui.begin();
+
+    {
+        ImGui::Begin("Values");
+        for (auto hand: simpleHands) {
+            if (hand.isLeft) {
+                ImGui::Value("Left x", hand.handPos.x);
+                ImGui::Value("Left y", hand.handPos.y);
+                ImGui::Value("Left z", hand.handPos.z);
+            }
+            else {
+                ImGui::Value("Right x", hand.handPos.x);
+                ImGui::Value("Right y", hand.handPos.y);
+                ImGui::Value("Right z", hand.handPos.z);
+            }
+        }
+        ImGui::End();
+    }
+
+    gui.end();
 }
 
 //--------------------------------------------------------------
