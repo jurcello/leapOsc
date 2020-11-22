@@ -5,7 +5,7 @@
 #include "ofxOsc.h"
 #include "ofxLeapMotion2.h"
 
-#define OSC_SEND_PORT 20568
+#define OSC_SEND_PORT 2345
 #define OSC_SEND_HOST "localhost"
 
 class ofApp : public ofBaseApp {
@@ -50,6 +50,11 @@ public:
 	ofxOscSender sender;
 
 private:
-	void sendOscMessage(std::string address, float value);
+	void addOscMessageToBundle(ofxOscBundle &bundle, std::string address, float value);
+	void drawInterface();
+
+	float thereminVolume = 0.f;
+	float thereminPitch = 0.f;
+	int smoothen = 100;
 
 };

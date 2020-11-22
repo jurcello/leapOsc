@@ -28,9 +28,9 @@ void ofApp::update(){
 
     if( leap.isFrameNew() && simpleHands.size() ){
 
-        leap.setMappingX(-230, 230, -ofGetWidth()/2, ofGetWidth()/2);
-        leap.setMappingY(90, 490, -ofGetHeight()/2, ofGetHeight()/2);
-        leap.setMappingZ(-150, 150, -200, 200);
+        leap.setMappingX(-230, 230, 0, 1);
+        leap.setMappingY(90, 490, 0, 1);
+        leap.setMappingZ(-150, 150, 0, 1);
 
         fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
 
@@ -44,6 +44,24 @@ void ofApp::update(){
                 fingersFound.push_back(id);
             }
         }
+
+        bool hasMessages = false;
+        for (auto hand: simpleHands) {
+            if (hand.isLeft) {
+                this->thereminVolume = ofClamp((hand.handPos.y + ((float) this->smoothen - 1.f) * this->thereminVolume) / (float) smoothen, 0.f, 1.f);
+            }
+            else {
+                this->thereminPitch = ofClamp(((1.f - hand.handPos.z) + ((float) this->smoothen - 1.f) * this->thereminPitch) / (float) smoothen, 0.f, 1.f);
+            }
+            hasMessages = true;
+        }
+        if (hasMessages) {
+            ofxOscBundle bundle;
+            this->addOscMessageToBundle(bundle, "/theremin/volume", thereminVolume);
+            this->addOscMessageToBundle(bundle, "/theremin/pitch", thereminPitch);
+            sender.sendBundle(bundle);
+        }
+
     }
     leap.markFrameAsOld();
 }
@@ -97,34 +115,7 @@ void ofApp::draw(){
     }
     cam.end();
 
-    ////////////////
-    gui.begin();
-
-    {
-        ImGui::Begin("Values");
-        ImGui::Text("Sending on port %d", OSC_SEND_PORT);
-        for (auto hand: simpleHands) {
-            if (hand.isLeft) {
-                ImGui::Value("Left x", hand.handPos.x);
-                this->sendOscMessage("/leap/hand/left/x", hand.handPos.x);
-                ImGui::Value("Left y", hand.handPos.y);
-                this->sendOscMessage("/leap/hand/left/y", hand.handPos.y);
-                ImGui::Value("Left z", hand.handPos.z);
-                this->sendOscMessage("/leap/hand/left/z", hand.handPos.z);
-            }
-            else {
-                ImGui::Value("Right x", hand.handPos.x);
-                this->sendOscMessage("/leap/hand/right/x", hand.handPos.x);
-                ImGui::Value("Right y", hand.handPos.y);
-                this->sendOscMessage("/leap/hand/right/y", hand.handPos.y);
-                ImGui::Value("Right z", hand.handPos.z);
-                this->sendOscMessage("/leap/hand/right/z", hand.handPos.z);
-            }
-        }
-        ImGui::End();
-    }
-
-    gui.end();
+    this->drawInterface();
 }
 
 //--------------------------------------------------------------
@@ -187,10 +178,39 @@ void ofApp::exit(){
     leap.close();
 }
 
-void ofApp::sendOscMessage(std::string address, float value) {
+void ofApp::addOscMessageToBundle(ofxOscBundle &bundle, std::string address, float value) {
     ofxOscMessage m;
     m.setAddress(address);
     m.addFloatArg(value);
-    sender.sendMessage(m, false);
+    bundle.addMessage(m);
+}
+
+void ofApp::drawInterface() {
+    gui.begin();
+
+    ofxOscBundle bundle;
+
+    {
+        ImGui::Begin("Values");
+        ImGui::Text("Sending on port %d", OSC_SEND_PORT);
+        ImGui::Value("Theremin volume", thereminVolume);
+        ImGui::Value("Theremin pitch", thereminPitch);
+        ImGui::InputInt("Smoothen", &this->smoothen);
+        ImGui::End();
+    }
+    {
+        ImGui::Begin("Triggers for learning");
+        ImGui::Text("Sending on port %d", OSC_SEND_PORT);
+        if (ImGui::Button("Theremin volume")) {
+            this->addOscMessageToBundle(bundle, "/theremin/volume", 0.5f);
+        }
+        if (ImGui::Button("Theremin pitch")) {
+            this->addOscMessageToBundle(bundle, "/theremin/pitch", 0.5f);
+        }
+        ImGui::End();
+    }
+
+    gui.end();
+    sender.sendBundle(bundle);
 }
 
