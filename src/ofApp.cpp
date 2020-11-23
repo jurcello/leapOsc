@@ -28,7 +28,7 @@ void ofApp::update(){
 
     if( leap.isFrameNew() && simpleHands.size() ){
 
-        leap.setMappingX(-230, 230, 0, 1);
+        leap.setMappingX(-230, 230, 0.f, 1.f);
         leap.setMappingY(90, 490, 0, 1);
         leap.setMappingZ(-150, 150, 0, 1);
 
@@ -49,6 +49,7 @@ void ofApp::update(){
         for (auto hand: simpleHands) {
             if (hand.isLeft) {
                 this->thereminVolume = ofClamp((hand.handPos.y + ((float) this->smoothen - 1.f) * this->thereminVolume) / (float) smoothen, 0.f, 1.f);
+                this->leftHandX = ofClamp(hand.handPos.x, -0.5f, 0.5f);
             }
             else {
                 this->thereminPitch = ofClamp(((1.f - hand.handPos.z) + ((float) this->smoothen - 1.f) * this->thereminPitch) / (float) smoothen, 0.f, 1.f);
@@ -59,6 +60,7 @@ void ofApp::update(){
             ofxOscBundle bundle;
             this->addOscMessageToBundle(bundle, "/theremin/volume", thereminVolume);
             this->addOscMessageToBundle(bundle, "/theremin/pitch", thereminPitch);
+            this->addOscMessageToBundle(bundle, "/theremin/leftX", leftHandX);
             sender.sendBundle(bundle);
         }
 
@@ -195,6 +197,7 @@ void ofApp::drawInterface() {
         ImGui::Text("Sending on port %d", OSC_SEND_PORT);
         ImGui::Value("Theremin volume", thereminVolume);
         ImGui::Value("Theremin pitch", thereminPitch);
+        ImGui::Value("Theremin leftX", leftHandX);
         ImGui::InputInt("Smoothen", &this->smoothen);
         ImGui::End();
     }
@@ -206,6 +209,9 @@ void ofApp::drawInterface() {
         }
         if (ImGui::Button("Theremin pitch")) {
             this->addOscMessageToBundle(bundle, "/theremin/pitch", 0.5f);
+        }
+        if (ImGui::Button("Left hand X")) {
+            this->addOscMessageToBundle(bundle, "/theremin/leftX", 0.0f);
         }
         ImGui::End();
     }

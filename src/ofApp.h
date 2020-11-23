@@ -55,6 +55,7 @@ private:
 
 	float thereminVolume = 0.f;
 	float thereminPitch = 0.f;
-	int smoothen = 100;
+	float leftHandX = 0.f;
+	int smoothen = 1;
 
 };
