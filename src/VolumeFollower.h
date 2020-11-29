@@ -18,6 +18,14 @@ public:
     float minBoundary;
     float maxBoundary;
     float currentVolume;
+
+    bool currentPositionOutsideBoundary(const ofPoint &currentPosition) const;
+
+    bool volumeIsFarAwayFromCurrentVolume(float volume) const;
+
+    void approachVolume(float volume);
+
+    void updateVolume(float volume);
 };
 
 

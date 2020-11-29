@@ -19,9 +19,16 @@ void ofApp::setup(){
     gui.setup();
     sender.setup(OSC_SEND_HOST, OSC_SEND_PORT);
 
-    volumeFollowers[0].setup(-0.5f, -0.1f);
-    volumeFollowers[1].setup(-0.1f, 0.1f);
-    volumeFollowers[2].setup(0.1f, 0.5f);
+    setupVolumeFollowers();
+}
+
+void ofApp::setupVolumeFollowers() {
+    volumeFollowers[0].setup(-0.5f, leftBoundary);
+    volumeFollowers[0].stepSize = followerStepsize;
+    volumeFollowers[1].setup(leftBoundary, rightBoundary);
+    volumeFollowers[1].stepSize = followerStepsize;
+    volumeFollowers[2].setup(rightBoundary, 0.5f);
+    volumeFollowers[2].stepSize = followerStepsize;
 }
 
 //--------------------------------------------------------------
@@ -227,6 +234,15 @@ void ofApp::drawInterface() {
     {
         ImGui::Begin("Followers");
         ImGui::Text("3 Followers defined");
+        if (ImGui::InputFloat("Left boundary", &leftBoundary, -1.f, rightBoundary)) {
+            setupVolumeFollowers();
+        }
+        if (ImGui::InputFloat("Right boundary", &rightBoundary, leftBoundary, 1.f)) {
+            setupVolumeFollowers();
+        }
+        if (ImGui::InputFloat("Follower stepsize", &followerStepsize, 0.001, 0.01)) {
+            setupVolumeFollowers();
+        }
         ImGui::Value("Follower 1", volumeFollowers[0].currentVolume);
         ImGui::Value("Follower 2", volumeFollowers[1].currentVolume);
         ImGui::Value("Follower 3", volumeFollowers[2].currentVolume);

@@ -4,6 +4,7 @@
 
 #include "VolumeFollower.h"
 #include "math.h"
+#include "ofMath.h"
 
 VolumeFollower::VolumeFollower()
 :minBoundary(-1.0f), maxBoundary(1.0f), currentVolume(0.f)
@@ -17,18 +18,35 @@ void VolumeFollower::setup(float minBoundary, float maxboundary) {
 
 
 void VolumeFollower::update(ofPoint currentPosition) {
+    if (currentPositionOutsideBoundary(currentPosition)) {
+        return;
+    }
     float volume = currentPosition.y;
-    if (currentPosition.x < minBoundary || currentPosition.x > maxBoundary) {
-        return;
+    if (volumeIsFarAwayFromCurrentVolume(volume)) {
+        approachVolume(volume);
+    } else {
+        updateVolume(volume);
     }
-    if (abs(volume - this->currentVolume) > stepSize * 2) {
-        if (volume > currentVolume) {
-            this->currentVolume += stepSize;
-        }
-        else {
-            this->currentVolume -= stepSize;
-        }
-        return;
+    this->currentVolume = ofClamp(currentVolume, 0.f, 1.f);
+}
+
+void VolumeFollower::updateVolume(float volume) {
+    currentVolume = volume;
+}
+
+void VolumeFollower::approachVolume(float volume) {
+    if (volume > currentVolume) {
+        currentVolume += stepSize;
     }
-    this->currentVolume = volume;
+    else {
+        currentVolume -= stepSize;
+    }
+}
+
+bool VolumeFollower::volumeIsFarAwayFromCurrentVolume(float volume) const {
+    return abs(volume - currentVolume) > stepSize * 2;
+}
+
+bool VolumeFollower::currentPositionOutsideBoundary(const ofPoint &currentPosition) const {
+    return currentPosition.z > 0.75f || currentPosition.x < minBoundary || currentPosition.x > maxBoundary;
 }

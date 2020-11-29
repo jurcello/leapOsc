@@ -59,5 +59,12 @@ private:
 	float leftHandX = 0.f;
 	int smoothen = 1;
 
+	float leftBoundary = -0.10f;
+	float rightBoundary = 0.10f;
+
+
 	VolumeFollower volumeFollowers[3];
+	float followerStepsize = 0.015f;
+
+	void setupVolumeFollowers();
 };
