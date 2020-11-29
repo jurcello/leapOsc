@@ -18,6 +18,10 @@ void ofApp::setup(){
 
     gui.setup();
     sender.setup(OSC_SEND_HOST, OSC_SEND_PORT);
+
+    volumeFollowers[0].setup(-0.5f, -0.1f);
+    volumeFollowers[1].setup(-0.1f, 0.1f);
+    volumeFollowers[2].setup(0.1f, 0.5f);
 }
 
 //--------------------------------------------------------------
@@ -28,7 +32,7 @@ void ofApp::update(){
 
     if( leap.isFrameNew() && simpleHands.size() ){
 
-        leap.setMappingX(-230, 230, 0.f, 1.f);
+        leap.setMappingX(-230, 230, -.5f, .5f);
         leap.setMappingY(90, 490, 0, 1);
         leap.setMappingZ(-150, 150, 0, 1);
 
@@ -66,6 +70,11 @@ void ofApp::update(){
 
     }
     leap.markFrameAsOld();
+    for (auto hand: simpleHands) {
+        for (auto &follower: volumeFollowers) {
+            follower.update(hand.handPos);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -213,6 +222,14 @@ void ofApp::drawInterface() {
         if (ImGui::Button("Left hand X")) {
             this->addOscMessageToBundle(bundle, "/theremin/leftX", 0.0f);
         }
+        ImGui::End();
+    }
+    {
+        ImGui::Begin("Followers");
+        ImGui::Text("3 Followers defined");
+        ImGui::Value("Follower 1", volumeFollowers[0].currentVolume);
+        ImGui::Value("Follower 2", volumeFollowers[1].currentVolume);
+        ImGui::Value("Follower 3", volumeFollowers[2].currentVolume);
         ImGui::End();
     }
 

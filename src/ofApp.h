@@ -4,6 +4,7 @@
 #include "ofxImGui.h"
 #include "ofxOsc.h"
 #include "ofxLeapMotion2.h"
+#include "VolumeFollower.h"
 
 #define OSC_SEND_PORT 2345
 #define OSC_SEND_HOST "localhost"
@@ -58,4 +59,5 @@ private:
 	float leftHandX = 0.f;
 	int smoothen = 1;
 
+	VolumeFollower volumeFollowers[3];
 };
