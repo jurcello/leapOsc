@@ -78,8 +78,14 @@ void ofApp::update(){
     }
     leap.markFrameAsOld();
     for (auto hand: simpleHands) {
-        for (auto &follower: volumeFollowers) {
-            follower.update(hand.handPos);
+        if (hand.isLeft) {
+            ofxOscMessage m;
+            m.setAddress("/volumes");
+            for (auto &follower: volumeFollowers) {
+                follower.update(hand.handPos);
+                m.addFloatArg(follower.currentVolume);
+            }
+            sender.sendMessage(m);
         }
     }
 }
@@ -98,7 +104,9 @@ void ofApp::draw(){
     ofSetColor(20);
     ofDrawGridPlane(800, 20, false);
     ofPopMatrix();
-
+    ofPushMatrix();
+    ofTranslate(0.f, -.5f, -.5f);
+    ofScale(ofGetWindowWidth(), ofGetWindowHeight(), 400.f);
 
     fingerType fingerTypes[] = {THUMB, INDEX, MIDDLE, RING, PINKY};
 
@@ -108,7 +116,7 @@ void ofApp::draw(){
         ofPoint handNormal = simpleHands[i].handNormal;
 
         ofSetColor(0, 0, 255);
-        ofDrawSphere(handPos.x, handPos.y, handPos.z, 20);
+        ofDrawSphere(handPos.x, handPos.y, handPos.z, 0.020f);
         ofSetColor(255, 255, 0);
         ofDrawArrow(handPos, handPos + 100*handNormal);
 
@@ -119,20 +127,20 @@ void ofApp::draw(){
             ofPoint tip = simpleHands[i].fingers[ fingerTypes[f] ].tip;  // fingertip
 
             ofSetColor(0, 255, 0);
-            ofDrawSphere(mcp.x, mcp.y, mcp.z, 12);
-            ofDrawSphere(pip.x, pip.y, pip.z, 12);
-            ofDrawSphere(dip.x, dip.y, dip.z, 12);
-            ofDrawSphere(tip.x, tip.y, tip.z, 12);
+            ofDrawSphere(mcp.x, mcp.y, mcp.z, 0.012f);
+            ofDrawSphere(pip.x, pip.y, pip.z, 0.012f);
+            ofDrawSphere(dip.x, dip.y, dip.z, 0.012f);
+            ofDrawSphere(tip.x, tip.y, tip.z, 0.012f);
 
             ofSetColor(255, 0, 0);
-            ofSetLineWidth(20);
+            ofSetLineWidth(0.20f);
             ofLine(mcp.x, mcp.y, mcp.z, pip.x, pip.y, pip.z);
             ofLine(pip.x, pip.y, pip.z, dip.x, dip.y, dip.z);
             ofLine(dip.x, dip.y, dip.z, tip.x, tip.y, tip.z);
         }
     }
+    ofPopMatrix();
     cam.end();
-
     this->drawInterface();
 }
 
